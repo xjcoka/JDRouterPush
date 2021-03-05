@@ -1,6 +1,7 @@
 import datetime
 import requests
 import os
+import json
 
 # API
 jd_base_url = "https://router-app-api.jdcloud.com/v1/regions/cn-north-1/"
@@ -14,10 +15,9 @@ final_result = {}
 # 设备名
 device_name = {}
 # 记录数
-records_num = 7
+records_num = 5
 # 当前版本
 version = "20210304"
-
 
 # 获取当天时间和当天积分
 def todayPointIncome():
@@ -162,10 +162,10 @@ def pointOperateRecordsShow(mac):
         print("Request pointOperateRecordsShow failed!")
 
 # 结果显示
-def resultDisplay(SERVERPUSHKEY):
+def resultDisplay():
     today_date = final_result["today_date"]
     today_total_point = final_result["today_total_point"]
-    title = today_date + "到账积分:" +  today_total_point
+    title = "京东云无线宝"
     todayDate = final_result["todayDate"]
     total_avail_point = final_result["total_avail_point"]
     totalRecord = final_result["totalRecord"]
@@ -176,7 +176,7 @@ def resultDisplay(SERVERPUSHKEY):
     # 更新检测
     if final_result.get("updates_version"):
         content = content + "**JDRouterPush更新提醒:**" \
-                  + "\n```\n最新版：" + final_result["updates_version"] \
+                  + "\n最新版：" + final_result["updates_version"] \
                   + "  当前版本：" + version
         if final_result.get("update_log"):
             content = content + "\n" + final_result["update_log"] + "\n```"
@@ -194,15 +194,15 @@ def resultDisplay(SERVERPUSHKEY):
         if pointInfo.get("satisfiedTimes"):
             satisfiedTimes = pointInfo["satisfiedTimes"]
         pointRecords = pointInfo["pointRecords"]
-        point_infos = point_infos+ "\n" + "* " + device_name.get(str(mac[-6:]),"京东云无线宝_" + str(mac[-3:])) + "==>" \
-                      + "\n   · 今日积分：" + str(todayPointIncome) \
-                      + "\n   · 可用积分：" + str(amount) \
-                      + "\n   · 总收益积分：" + str(allPointIncome)
+        point_infos = point_infos+ "\n<b>" + "* " + device_name.get(str(mac[-6:]),"京东云无线宝_" + str(mac[-3:])) + "</b>==>" \
+                      + "\n· 今日积分： " + str(todayPointIncome) \
+                      + "\n· 可用积分： " + str(amount) \
+                      + "\n· 总收益积分： " + str(allPointIncome)
         if satisfiedTimes != "":
-            point_infos = point_infos + "\n   · 累计在线：" + str(satisfiedTimes)  + "天"
-        point_infos = point_infos + "\n   · 最近到期积分：" + str(recentExpireAmount) \
-                      + "\n   · 最近到期时间：" + recentExpireTime \
-                      + "\n   · 最近" + str(records_num) + "条记录："
+            point_infos = point_infos + "\n· 累计在线： " + str(satisfiedTimes)  + "天"
+        point_infos = point_infos + "\n· 最近到期积分： " + str(recentExpireAmount) \
+                      + "\n· 最近到期时间： " + recentExpireTime \
+                      + "\n· 最近" + str(records_num) + "条记录："
         for pointRecord in pointRecords:
             recordType = pointRecord["recordType"]
             recordType_str = ""
@@ -213,13 +213,14 @@ def resultDisplay(SERVERPUSHKEY):
             pointAmount = pointRecord["pointAmount"]
             createTime = pointRecord["createTime"]
             point_infos = point_infos + "\n          " + createTime + "   " + recordType_str + str(pointAmount)
-    content = content + "---\n" + "**数据日期:**" + "\n```\n" + todayDate + "\n```\n" \
-              + "**今日总收益:**" + "\n```\n" + today_total_point + "\n```\n" \
-              + "**总可用积分:**" + "\n```\n" + total_avail_point + "\n```\n" \
-              + "**绑定账户:**" + "\n```\n" + bindAccount + "\n```\n"\
-              + "**设备总数:**" + "\n```\n"+ totalRecord + "\n```\n"\
-              + "**设备信息如下:**" + "\n```" + point_infos + "\n"
-    sendNotification(SERVERPUSHKEY,title,content)
+    content = content + "<b>概览</b>\n" \
+              + "【数据日期】 " +todayDate + "\n" \
+              + "【今日总收益】 " + today_total_point + "\n" \
+              + "【总可用积分】 " +  total_avail_point + "\n" \
+              + "【绑定账户】 " + bindAccount + "\n"\
+              + "【设备总数】 " + totalRecord + "\n\n"\
+              + "<b>设备信息</b> " + point_infos
+    sendNotification(title,content)
 
 # 解析设备名称
 def resolveDeviceName(DEVICENAME):
@@ -233,7 +234,22 @@ def resolveDeviceName(DEVICENAME):
             device_name.update({mac: name})
 
 # 推送通知
-def sendNotification(SERVERPUSHKEY,text,desp):
+def sendNotification(text,desp):
+    # server推送
+    serverJNotify(text,desp)
+    # tgBot推送
+    tgBotNotify(text, desp)
+    # qywxBot推送
+    qywxBotNotify(text, desp)
+    # qywxam推送
+    qywxamNotify(text, desp)
+
+def serverJNotify(text,desp):
+    SERVERPUSHKEY = os.environ.get("SERVERPUSHKEY","")
+    if not SERVERPUSHKEY:
+        print("Server酱推送的SERVERPUSHKEY未设置!!\n取消推送")
+        return
+    print("Server酱 推送开始")
     # server推送
     server_push_url = "https://sc.ftqq.com/" + SERVERPUSHKEY + ".send"
     str = SERVERPUSHKEY[0:3]
@@ -245,12 +261,86 @@ def sendNotification(SERVERPUSHKEY,text,desp):
     }
     res = requests.post(url=server_push_url, params=params)
     if res.status_code == 200:
-        print("推送成功!")
+        print("Server酱 推送成功!")
     else:
-        print("推送失败!")
-    print("标题->",text)
-    print("内容->\n",desp)
+        print("Server酱 推送失败!")
 
+def tgBotNotify(text, desp):
+    TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN","")
+    TG_USER_ID = os.environ.get("TG_USER_ID","")
+    if not TG_BOT_TOKEN or not TG_USER_ID:
+        print("Telegram推送的tg_bot_token或者tg_user_id未设置!!\n取消推送")
+        return
+    print("Telegram 推送开始")
+        
+    desp = desp.replace("<b>", "").replace("</b>", "")
+    send_data = {"chat_id": TG_USER_ID, "text": text +
+                 '\n\n'+desp, "disable_web_page_preview": "true"}
+    response = requests.post(
+        url='https://api.telegram.org/bot%s/sendMessage' % (TG_BOT_TOKEN), data=send_data)
+    if response.status_code == 200:
+        print("Telegram 推送成功!")
+    else:
+        print("Telegram 推送失败!")
+
+def qywxBotNotify(text, desp):
+    QYWX_KEY = os.environ.get("QYWX_KEY","")
+    if not QYWX_KEY:
+        print("企业微信Bot推送的QYWX_KEY!!\n取消推送")
+        return
+    print("企业微信Bot 推送开始")        
+    request_url = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s" % QYWX_KEY
+    datas = {
+        "msgtype": "text",
+        "text": {"content":  text + '\n\n' + desp}
+    }
+    http_headers = {"Content-Type": "application/json"}
+    req = requests.post(
+        url = request_url,
+        data = datas,
+        headers = http_headers,
+        timeout = 10
+    )
+    if req.status_code == 200:
+        print("企业微信Bot 推送成功!")
+    else:
+        print("企业微信Bot 推送失败!")
+
+def qywxamNotify(text, desp):
+    QYWX_AM = os.environ.get("QYWX_AM","")
+    if not QYWX_AM:
+        print("企业微信应用推送的QYWX_AM!!\n取消推送")
+        return
+    print("企业微信应用 推送开始")
+    
+    QYWX_AM_AY = QYWX_AM.split(',');
+    res = requests.get("https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=%s&corpsecret=%s" %(QYWX_AM_AY[0],QYWX_AM_AY[1]) )
+    if res.status_code == 200:
+        data = json.loads(res.text)
+        if data["errcode"] == 0:
+            access_token = data["access_token"]
+            digest = desp.replace("<b>", "").replace("</b>", "")
+            data = {
+                "touser": QYWX_AM_AY[2],
+                "msgtype": "mpnews",
+                "agentid": QYWX_AM_AY[3],
+                "mpnews": {
+                    "articles": [{
+                        "title": text,
+                        "thumb_media_id": QYWX_AM_AY[4],
+                        "content_source_url": "",
+                        "content": desp.replace("\n", "<br/>"),
+                        "digest": digest[:(desp.find("设备信息"))]
+                    }]
+                },
+                "safe": "0"
+            }
+            req = requests.post("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={}".format(access_token), data=json.dumps(data))
+            if req.status_code == 200:
+                print("企业微信应用 推送成功!")
+            else:
+                print("企业微信应用 推送失败!")
+            
 # 检测更新
 def checkForUpdates():
     remote_address = "https://raw.githubusercontent.com/leifengwl/JDRouterPush/main/config.ini"
@@ -270,7 +360,7 @@ def checkForUpdates():
         print("checkForUpdate failed!")
 
 # 主操作
-def main(WSKEY,SERVERPUSHKEY,DEVICENAME,RECORDSNUM):
+def main(WSKEY,DEVICENAME,RECORDSNUM):
     global records_num
     headers["wskey"] = WSKEY
     records_num = int(RECORDSNUM)
@@ -279,12 +369,11 @@ def main(WSKEY,SERVERPUSHKEY,DEVICENAME,RECORDSNUM):
     todayPointIncome()
     todayPointDetail()
     pinTotalAvailPoint()
-    resultDisplay(SERVERPUSHKEY)
+    resultDisplay()
 
 # 读取配置文件
 if __name__ == '__main__':
     WSKEY = os.environ.get("WSKEY","")
-    SERVERPUSHKEY = os.environ.get("SERVERPUSHKEY","")
     DEVICENAME = os.environ.get("DEVICENAME","")
     RECORDSNUM = os.environ.get("RECORDSNUM","7")
-    main(WSKEY,SERVERPUSHKEY,DEVICENAME,RECORDSNUM)
+    main(WSKEY,DEVICENAME,RECORDSNUM)
