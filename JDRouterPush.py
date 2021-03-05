@@ -375,5 +375,5 @@ def main(WSKEY,DEVICENAME,RECORDSNUM):
 if __name__ == '__main__':
     WSKEY = os.environ.get("WSKEY","")
     DEVICENAME = os.environ.get("DEVICENAME","")
-    RECORDSNUM = os.environ.get("RECORDSNUM","7")
+    RECORDSNUM = os.environ.get("RECORDSNUM","5")
     main(WSKEY,DEVICENAME,RECORDSNUM)
