@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: checkout
+      uses: actions/checkout@main
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
@@ -24,6 +25,10 @@ jobs:
     - name: Run JDRouterPush
       env:
           WSKEY: ${{ secrets.WSKEY }}
-          SERVERPUSHKEY: ${{ secrets.SERVERPUSHKEY }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_USER_ID: ${{ secrets.TG_USER_ID }}
+          QYWX_KEY: ${{ secrets.QYWX_KEY }}
+          QYWX_AM: ${{ secrets.QYWX_AM }}
+          DEVICENAME: ${{ secrets.DEVICENAME }}
       run: |
         python JDRouterPush.py
