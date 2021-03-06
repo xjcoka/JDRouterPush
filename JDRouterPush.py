@@ -343,7 +343,7 @@ def qywxamNotify(text, desp):
             
 # 检测更新
 def checkForUpdates():
-    remote_address = "https://raw.githubusercontent.com/xjcoka/JDRouterPush/main/config.ini"
+    remote_address = "https://raw.githubusercontent.com/leifengwl/JDRouterPush/main/config.ini"
     headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36"
     }
@@ -365,7 +365,7 @@ def main(WSKEY,DEVICENAME,RECORDSNUM):
     headers["wskey"] = WSKEY
     records_num = int(RECORDSNUM)
     resolveDeviceName(DEVICENAME)
-    checkForUpdates()
+    #checkForUpdates()
     todayPointIncome()
     todayPointDetail()
     pinTotalAvailPoint()
