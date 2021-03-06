@@ -330,7 +330,7 @@ def qywxamNotify(text, desp):
                         "thumb_media_id": QYWX_AM_AY[4],
                         "content_source_url": "",
                         "content": desp.replace("\n", "<br/>"),
-                        "digest": digest[:(digest.find("设备信息"))]
+                        "digest": digest[:(digest.find("设备信息"))].strip()
                     }]
                 },
                 "safe": "0"
