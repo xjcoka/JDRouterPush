@@ -42,23 +42,7 @@ JDRouterPush
 
 1. **Fork 本项目**
 2. **获取京东云无线宝wskey**
-- 目前只用Android抓包演示（抓包工具有很多，这里使用HttpCanary作为演示）
-
-- 打开HttpCanary点击右下角按钮开始抓包
-
-  <img src="docs/IMG/httpcanary1.jpg" style="zoom: 33%;" />
-
-- 然后再打开京东云无线宝,点击积分管理
-
-  <img src="docs/IMG/httpcanary2.jpg" style="zoom: 33%;" /><img src="docs/IMG/httpcanary3.jpg" style="zoom: 33%;" />
-
-- 回到HttpCanary，右上角找到搜索，搜索`wskey` 
-
-  <img src="docs/IMG/httpcanary4.jpg" style="zoom:33%;" />
-
-- 然后随便点击一条进去，找到请求里面的`wskey` ，复制值
-
-  <img src="docs/IMG/httpcanary5.jpg" style="zoom:33%;" />
+- 目前只用Android抓包
 
 3. **点击项目 Settings -> Secrets -> New Secrets 添加以下 2 个 Secrets，其中server酱微信推送的sckey可参阅[微信订阅通知](#微信订阅通知)**
 
@@ -77,15 +61,9 @@ JDRouterPush
 
 多个设备：456EF7:韭菜1号&789FE1:韭菜2号&123FR2:韭菜3号             （中间使用&连接即可）
 
-
-
-​	<img src="docs/IMG/settings.jpg" style="zoom: 50%;" />
-
 1. **开启 Actions 并触发每日自动执行**
 
 **Github Actions 默认处于关闭状态，需要手动开启 Actions ，执行一次工作流，验证是否可以正常工作。**
-
-![图示](docs/IMG/actions.jpg)
 
 如果需要修改每日任务执行的时间，请修改 `.github/workflows/JDPush.yml`，在第 7行左右位置找到下如下配置。
 
