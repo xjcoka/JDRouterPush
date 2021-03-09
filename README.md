@@ -81,23 +81,3 @@ JDRouterPush
 
 ### 订阅执行结果
 
-目前Turbo版本的消息通道支持以下渠道
-
-- 企业微信应用消息
-- Android
-- Bark iOS
-- 企业微信群机器人
-- 钉钉群机器人
-- 飞书群机器人
-- 自定义微信测试号
-- 方糖服务号
-
-1. 前往 [sct.ftqq.com](https://sct.ftqq.com/sendkey)点击登入，创建账号。
-2. 点击点[SendKey](https://sct.ftqq.com/sendkey) ，生成一个 Key。将其增加到 Github Secrets 中，变量名为 `SERVERPUSHKEY`
-3. [配置消息通道](https://sct.ftqq.com/forward) ，选择方糖服务号，保存即可。
-4. 推送效果展示
-   <img src="docs/IMG/ysxg1.jpg" style="zoom:33%;" /> <img src="docs/IMG/ysxg2.jpg" style="zoom:33%;" />
-
-**旧版推送渠道[sc.ftqq.com](http://sc.ftqq.com/9.version)即将与4月底下线，请前往[sct.ftqq.com](https://sct.ftqq.com/sendkey)生成`Turbo`版本的`Key`
-注意，申请Turbo版Key后请配置消息通道，如果想沿用以前的微信推送方式，选择方糖服务号即可**
-
